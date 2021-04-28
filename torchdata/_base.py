@@ -62,7 +62,7 @@ class MetaDataset(type):
     Operations implemented by MetaBase:
     - cache - cache data on disk or RAM or user specified way
 
-    WARNING: You **should not** use this metaclass in your code.
+    WARNING: You __should not__ use this metaclass in your code.
     If you wish to use provided functionality, please inherit Base class [ref].
 
     """
