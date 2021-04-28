@@ -1,16 +1,11 @@
-r"""__This module contains interface needed for__ `cachers` __(used in__ `cache` __method of__ `td.Dataset` __) .__
-
+r"""This module contains interface needed for `cachers` (used in `cache` method of `td.Dataset` ) .
 To cache on disk all samples using Python's `pickle [here](https://docs.python.org/3/library/pickle.html) in folder `cache`
 (assuming you have already created `td.Dataset` instance named `dataset`)::
-
     import torchdata as td
-
     ...
     dataset.cache(td.cachers.Pickle("./cache"))
-
 Users are encouraged to write their custom `cachers` if the ones provided below
 are too slow or not good enough for their purposes (see `Cacher` abstract interface below).
-
 """
 
 import abc
@@ -27,43 +22,37 @@ from ._base import Base
 
 
 class Cacher(Base):
-    r"""__Interface to fulfil to make object compatible with__ `torchdata.Dataset.cache` __method.__
-
+    r"""Interface to fulfil to make object compatible with `torchdata.Dataset.cache` method.
     If you want to implement your own `caching` functionality, inherit from
     this class and implement methods described below.
     """
 
     @abc.abstractmethod
     def __contains__(self, index: int) -> bool:
-        r"""__Return true if sample under__ `index` __is cached.__
-
+        r"""Return true if sample under `index` is cached.
         If `False` returned, cacher's `__setitem__` will be called, hence if you are not
         going to cache sample under this `index`, you should describe this operation
         at that method.
         This is simply a boolean indicator whether sample is cached.
-
         If `True` cacher's `__getitem__` will be called and it's users responsibility
         to return correct value in such case.
-
         Arguments:
-            index: int
+            index:
                     Index of sample
         Returns:
             bool
-
         """
 
     # Save if doesn't contain
     @abc.abstractmethod
     def __setitem__(self, index: int, data: typing.Any) -> None:
-        r"""__Saves sample under index in cache or do nothing.__
-
+        r"""Saves sample under index in cache or do nothing.
         This function should save sample under `index` to be later
         retrieved by `__getitem__`.
         If you don't want to save specific `index`, you can implement this functionality
         in `cacher` or create separate `modifier` solely for this purpose
         (second approach is highly recommended).
-
+        
         Arguments:
             index:
                     Index of sample
@@ -74,18 +63,15 @@ class Cacher(Base):
     # Save if doesn't contain
     @abc.abstractmethod
     def __getitem__(self, index) -> typing.Any:
-        r"""__Retrieve sample from cache.__
-
-        __This function MUST return valid data sample and it's users responsibility
-        if custom cacher is implemented__.
-
+        r"""Retrieve sample from cache.
+        This function MUST return valid data sample and it's users responsibility
+        if custom cacher is implemented.
         Return from this function datasample which lies under it's respective
         `index`.
-
-        Parameters:
+        
+        Arguments:
             index:
                     Index of sample
-
         Returns:
             Any
                 Sample kept in cache
@@ -93,74 +79,65 @@ class Cacher(Base):
 
 
 class Pickle(Cacher):
-    r"""__Save and load data from disk using__ `pickle` __module.__
-
+    r"""Save and load data from disk using `pickle` module.
     Data will be saved as `.pkl` in specified path. If path does not exist,
     it will be created.
-
-    __This object can be used as a__ `context manager` __and it will delete__ `path` __at the end of block__::
-
+    This object can be used as a `context manager` and it will delete `path` at the end of block::
         with td.cachers.Pickle(pathlib.Path("./disk")) as pickler:
             dataset = dataset.map(lambda x: x+1).cache(pickler)
             ... # Do something with dataset
         ... # Folder removed
-
     You can also issue `clean()` method manually for the same effect
     (though it's discouraged as you might crash `__setitem__` method).
-
-
     !!!note
-
         This `cacher` can act between consecutive runs, just don't use `clean()` method
-        or don't delete the folder manually. If so, **please ensure correct sampling**
+        or don't delete the folder manually. If so, please ensure correct sampling
         (same seed and sampling order) for reproducible behaviour between runs.
-
-
     Attributes:
         path:
                 Path to the folder where samples will be saved and loaded from.
         extension:
                 Extension to use for saved pickle files. Default: `.pkl`
-
     """
 
     def __init__(self, path: pathlib.Path, extension: str = ".pkl"):
+        """Initialize `Pickle` object.
+        
+        Arguments:
+            path:
+                    Path to the folder where samples will be saved and loaded from.
+            extension:
+                    Extension to use for saved pickle files. Default: `.pkl`
+        """
         self.path = path
         self.path.mkdir(parents=True, exist_ok=True)
         self.extension = extension
 
     def __contains__(self, index: int) -> bool:
-        """__Check whether file exists on disk.__
-
+        """Check whether file exists on disk.
         If file is available it is considered cached, hence you can cache data
         between multiple runs (if you ensure repeatable sampling).
-
         """
         return pathlib.Path(
             (self.path / str(index)).with_suffix(self.extension)
         ).is_file()
 
     def __setitem__(self, index: int, data: int):
-        """__Save__ `data` __in specified folder.__
-
+        """Save `data` in specified folder.
         Name of the item will be equal to `{self.path}/{index}{extension}`.
-
         """
         with open((self.path / str(index)).with_suffix(self.extension), "wb") as file:
             pickle.dump(data, file)
 
     def __getitem__(self, index: int):
-        """__Retrieve__ `data` __specified by__ `index`.
-
+        """**Retrieve `data` specified by `index`.
         Name of the item will be equal to `{self.path}/{index}{extension}`.
-
         """
         with open((self.path / str(index)).with_suffix(self.extension), "rb") as file:
             return pickle.load(file)
 
     def clean(self) -> None:
-        """__Remove recursively folder__ `self.path`.
-
+        """Remove recursively folder `self.path`.
         Behaves just like `shutil.rmtree`, but won't act if directory does not exist.
         """
 
@@ -175,13 +152,11 @@ class Pickle(Cacher):
 
 
 class Memory(Cacher):
-    r"""__Save and load data in Python dictionary__.
-
+    r"""Save and load data in Python dictionary.
     This `cacher` is used by default inside `torchdata.Dataset`.
-
     Attributes:
         cache:
-            Optional, user-provided caching dictionary (i.e. obtained with multiprocessing.Manager)
+                Optional, user-provided caching dictionary (i.e. obtained with multiprocessing.Manager)
     """
 
     def __init__(self, cache: Optional[dict]=None):
@@ -203,29 +178,21 @@ class Memory(Cacher):
 
 
 class Tensor(Cacher):
-    r"""__Save and load data from disk using PyTorch's __ `save` __function.__
-
+    r"""Save and load data from disk using PyTorch's  `save` function.
     Tensors will be saved as `.pt` in specified path. If path does not exist,
     it will be created.
-
-    __This object can be used as a__ `context manager` __and it will delete__ `path` __at the end of block__::
-
+    This object can be used as a `context manager` and it will delete `path` at the end of block::
         with td.cachers.Tensor(pathlib.Path("./disk")) as cacher:
             dataset = dataset.map(lambda x: x+1).cache(cacher)
             ... # Do something with dataset
         ... # Folder removed
-
     You can also issue `clean()` method manually for the same effect
     (though it's discouraged as you might crash `__setitem__` method).
-
-
     !!!note
-
         This `cacher` can act between consecutive runs, just don't use `clean()` method
         or don't delete the folder manually. If so, **please ensure correct sampling**
         (same seed and sampling order) for reproducible behaviour between runs.
-
-    Attributes
+    Attributes:
         path:
             Path to the folder where samples will be saved and loaded from.
         extension:
@@ -243,7 +210,6 @@ class Tensor(Cacher):
             optional keyword arguments passed over to :func:`pickle_module.load`
             and :func:`pickle_module.Unpickler`, e.g., :attr:`errors=...`.
             See `torch.load`
-
     """
 
     def __init__(
@@ -285,21 +251,17 @@ class Tensor(Cacher):
         self.pickle_load_args = pickle_load_args
 
     def __contains__(self, index: int) -> bool:
-        """__Check whether file exists on disk.__
-
+        """Check whether file exists on disk.
         If file is available it is considered cached, hence you can cache data
         between multiple runs (if you ensure repeatable sampling).
-
         """
         return pathlib.Path(
             (self.path / str(index)).with_suffix(self.extension)
         ).is_file()
 
     def __setitem__(self, index: int, data: int):
-        """__Save__ `data` __in specified folder.__
-
+        """Save `data` in specified folder.
         Name of the item will be equal to `{self.path}/{index}{extension}`.
-
         """
         torch.save(
             data,
@@ -309,10 +271,8 @@ class Tensor(Cacher):
         )
 
     def __getitem__(self, index: int):
-        """__Retrieve__ `data` __specified by__ `index`.
-
+        """Retrieve `data` specified by `index`.
         Name of the item will be equal to `{self.path}/{index}{extension}`.
-
         """
         torch.load(
             (self.path / str(index)).with_suffix(self.extension),
@@ -322,8 +282,7 @@ class Tensor(Cacher):
         )
 
     def clean(self) -> None:
-        """__Remove recursively folder__ `self.path`.
-
+        """Remove recursively folder `self.path`.
         Behaves just like `shutil.rmtree`, but won't act if directory does not exist.
         """
 
