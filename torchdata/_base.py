@@ -21,7 +21,8 @@ class MetaIterable(type):
     Operations implemented by MetaIterable
     - map - apply function to each element of dataset
 
-    WARNING: You __should not__ use this metaclass in your code.
+    !!!note
+    You __should not__ use this metaclass in your code.
     If you wish to use provided functionality, please inherit Iterable class [ref].
 
     """
@@ -62,7 +63,8 @@ class MetaDataset(type):
     Operations implemented by MetaBase:
     - cache - cache data on disk or RAM or user specified way
 
-    WARNING: You __should not__ use this metaclass in your code.
+    !!!note
+    You __should not__ use this metaclass in your code.
     If you wish to use provided functionality, please inherit Base class [ref].
 
     """
