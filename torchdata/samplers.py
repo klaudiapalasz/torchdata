@@ -1,8 +1,8 @@
-r"""**This module implements samplers to be used in conjunction with** `torch.utils.data.DataLoader` **instances**.
+r"""This module implements samplers to be used in conjunction with `torch.utils.data.DataLoader` instances.
 
 Those can be used just like PyTorch's `torch.utils.data.Sampler` instances.
 
-See `PyTorch tutorial <https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler>`__
+See `PyTorch tutorial [here](https://pytorch.org/docs/stable/data.html#data-loading-order-and-sampler)
 for more examples and information.
 
 """
@@ -18,7 +18,7 @@ from ._base import Base
 # Source of mixed class below:
 # https://github.com/pytorch/pytorch/blob/master/torch/utils/data/sampler.py#L68
 class RandomSubsetSampler(Base, RandomSampler):
-    r"""**Sample elements randomly from a given list of indices.**
+    r"""Sample elements randomly from a given list of indices.
 
     If without `replacement`, then sample from a shuffled dataset.
     If with replacement, then user can specify :attr:`num_samples` to draw.
@@ -26,13 +26,12 @@ class RandomSubsetSampler(Base, RandomSampler):
     Similar to PyTorch's `SubsetRandomSampler`, but this one allows you to specify
     `indices` which will be sampled in random order, not `range` subsampled.
 
-    Parameters
-    ----------
-    indices : typing.Iterable
+    Arguments:
+        indices :
             A sequence of indices
-    replacement : bool, optional
+        replacement :
             Samples are drawn with replacement if `True`. Default: `False`
-    num_samples : int, optional
+        num_samples :
             Number of samples to draw, default=`len(dataset)`. This argument
             is supposed to be specified only when `replacement` is `True`.
             Default: `None`
@@ -86,23 +85,28 @@ class _Equalizer(Sampler):
 
 
 class WeightedImbalancedSampler(torch.utils.data.WeightedRandomSampler):
-    r"""**Sample elements using per-class weights.**
+    r"""Sample elements using per-class weights.
 
     Data points with underrepresented classes will have higher probability
     of being chosen.
 
-    .. note::
+    !!!note
 
         Labels (possibly multiclass) have to be of shape `(N,)`
         (single dimension). No additional dimensions allowed.
 
-    Parameters
-    ----------
-    labels : torch.Tensor
+    Attributes:
+        labels :
             Tensor containing labels for respective samples.
     """
 
     def __init__(self, labels, num_samples: int):
+        """Initialize `WeightedImbalancedSampler` object.
+        
+        Arguments:
+            labels :
+                Tensor containing labels for respective samples.
+        """
         super().__init__(
             weights=(
                 torch.nn.functional.one_hot(labels)
@@ -113,54 +117,63 @@ class WeightedImbalancedSampler(torch.utils.data.WeightedRandomSampler):
 
 
 class RandomOverSampler(_Equalizer):
-    r"""**Sample elements randomly with underrepresented classes upsampled.**
+    r"""Sample elements randomly with underrepresented classes upsampled.
 
     Length is equal to `max_samples_per_class * classes`.
 
-    .. note::
+    !!!note
 
         Labels (possibly multiclass) have to be of shape `(N,)`
         (single dimension). No additional dimensions allowed.
 
 
-    Parameters
-    ----------
-    labels : torch.Tensor
+    Attributes:
+        labels :
             Tensor containing labels for respective samples.
     """
 
     def __init__(self, labels):
+        """Initialize `RandomOverSampler` object.
+        
+        Arguments:
+            labels :
+                Tensor containing labels for respective samples.
+        """
         super().__init__(labels, "max")
 
 
 class RandomUnderSampler(_Equalizer):
-    r"""**Sample elements randomly with overrepresnted classes downsampled.**
+    r"""Sample elements randomly with overrepresnted classes downsampled.
 
     Length is equal to `min_samples_per_class * classes`.
 
-    .. note::
+    !!!note
 
         Labels (possibly multiclass) have to be of shape `(N,)`
         (single dimension). No additional dimensions allowed.
 
-    Parameters
-    ----------
-    labels : torch.Tensor
+    Attributes:
+        labels : torch.Tensor
             Tensor containing labels for respective samples.
     """
 
     def __init__(self, labels: torch.tensor):
+        """Initialize `RandomUnderSampler` object.
+        
+        Arguments:
+            labels : torch.Tensor
+                Tensor containing labels for respective samples.
+        """
         super().__init__(labels, "min")
 
 
 class Distribution(Sampler):
-    r"""**Sample** `num_samples` **indices from distribution object.**
+    r"""Sample `num_samples` indices from distribution object.
 
-    Parameters
-    ----------
-    distribution : torch.distributions.distribution.Distribution
+    Attributes:
+        distribution :
             Distribution-like object implementing `sample()` method.
-    num_samples : int
+        num_samples :
             Number of samples to be yielded
 
     """
@@ -170,6 +183,14 @@ class Distribution(Sampler):
         distribution: torch.distributions.distribution.Distribution,
         num_samples: int,
     ):
+        """Initialize `Distribution` object.
+        
+        Arguments:
+            distribution :
+                Distribution-like object implementing `sample()` method.
+            num_samples :
+                Number of samples to be yielded
+        """
         self.distribution = distribution
         self.num_samples = num_samples
 
