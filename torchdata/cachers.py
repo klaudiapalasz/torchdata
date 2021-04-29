@@ -38,7 +38,7 @@ class Cacher(Base):
         to return correct value in such case.
         Arguments:
             index:
-                    Index of sample
+                Index of sample
         Returns:
             bool
         """
@@ -95,9 +95,9 @@ class Pickle(Cacher):
         (same seed and sampling order) for reproducible behaviour between runs.
     Attributes:
         path:
-                Path to the folder where samples will be saved and loaded from.
+            Path to the folder where samples will be saved and loaded from.
         extension:
-                Extension to use for saved pickle files. Default: `.pkl`
+            Extension to use for saved pickle files. Default: `.pkl`
     """
 
     def __init__(self, path: pathlib.Path, extension: str = ".pkl"):
@@ -105,9 +105,9 @@ class Pickle(Cacher):
         
         Arguments:
             path:
-                    Path to the folder where samples will be saved and loaded from.
+                Path to the folder where samples will be saved and loaded from.
             extension:
-                    Extension to use for saved pickle files. Default: `.pkl`
+                Extension to use for saved pickle files. Default: `.pkl`
         """
         self.path = path
         self.path.mkdir(parents=True, exist_ok=True)
@@ -130,7 +130,7 @@ class Pickle(Cacher):
             pickle.dump(data, file)
 
     def __getitem__(self, index: int):
-        """**Retrieve `data` specified by `index`.
+        """Retrieve `data` specified by `index`.
         Name of the item will be equal to `{self.path}/{index}{extension}`.
         """
         with open((self.path / str(index)).with_suffix(self.extension), "rb") as file:
@@ -156,7 +156,7 @@ class Memory(Cacher):
     This `cacher` is used by default inside `torchdata.Dataset`.
     Attributes:
         cache:
-                Optional, user-provided caching dictionary (i.e. obtained with multiprocessing.Manager)
+            Optional, user-provided caching dictionary (i.e. obtained with multiprocessing.Manager)
     """
 
     def __init__(self, cache: Optional[dict]=None):
