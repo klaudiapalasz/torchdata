@@ -204,9 +204,9 @@ class Iterable(TorchIterable, _DatasetBase, metaclass=MetaIterable):
 
         Arguments:
             predicate:
-            Function returning bool and taking single argument (which is
-            whatever is returned from the dataset when `filter` is applied).
-            If `True`, sample will be returned, otherwise it is skipped.
+                Function returning bool and taking single argument (which is
+                whatever is returned from the dataset when `filter` is applied).
+                If `True`, sample will be returned, otherwise it is skipped.
 
         Returns:
             Dataset
@@ -382,7 +382,7 @@ class ConcatDataset(Dataset):
 
     Attributes:
         datasets :
-        List of datasets to be concatenated sample-wise.
+            List of datasets to be concatenated sample-wise.
 
     """
 
@@ -426,7 +426,7 @@ class ConcatIterable(Iterable):
 
     Attributes:
         datasets :
-                List of datasets to be concatenated sample-wise.
+            List of datasets to be concatenated sample-wise.
 
     """
 
