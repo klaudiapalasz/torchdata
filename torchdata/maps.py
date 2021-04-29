@@ -1,4 +1,4 @@
-r"""**This module provides functions one can use with** `torchdata.Dataset.map` **method.**
+r"""This module provides functions one can use with `torchdata.Dataset.map` method.
 
 Following `dataset` object will be used throughout documentation for brevity (if not defined explicitly)::
 
@@ -31,7 +31,7 @@ from ._base import Base
 
 
 class After(Base):
-    r"""**Apply function after specified number of samples passed.**
+    r"""Apply function after specified number of samples passed.
 
     Useful for introducing data augmentation after an initial warm-up period.
     If you want a direct control over when function will be applied to sample,
@@ -42,21 +42,27 @@ class After(Base):
         # After 10 samples apply lambda mapping
         dataset = dataset.map(After(10, lambda x: -x))
 
-    Parameters
-    ----------
-    samples : int
+    Arguments
+        samples :
             After how many samples function will start being applied.
-    function : Callable
+        function :
             Function to apply to sample.
 
-    Returns
-    -------
-    Union[sample, function(sample)]
+    Returns:
+        Union[sample, function(sample)]
             Either unchanged sample or function(sample)
 
     """
 
     def __init__(self, samples: int, function: typing.Callable):
+        """Initialize `After` object.
+        
+        Arguments:
+            samples :
+                After how many samples function will start being applied.
+            function :
+                Function to apply to sample.
+        """
         self.samples = samples
         self.function = function
         self._elements_counter = -1
@@ -69,7 +75,7 @@ class After(Base):
 
 
 class OnSignal(Base):
-    r"""**Apply function based on boolean output of signalling function.**
+    r"""Apply function based on boolean output of signalling function.
 
     Useful for introducing data augmentation after an initial warm-up period.
     You can use it to turn on/off specific augmentation with respect to outer world,
@@ -113,21 +119,27 @@ class OnSignal(Base):
             )
         )
 
-    Parameters
-    ----------
-    signal : Callable
+    Arguments:
+        signal :
             No argument callable returning boolean, indicating whether to apply function.
-    function: Callable
+        function:
             Function to apply to sample.
 
-    Returns
-    -------
-    Union[sample, function(sample)]
+    Returns:
+        Union[sample, function(sample)]
             Either unchanged sample of function(sample)
 
     """
 
     def __init__(self, signal: typing.Callable[..., bool], function: typing.Callable):
+        """Initialize `OnSignal` object.
+        
+        Arguments:
+            signal :
+                No argument callable returning boolean, indicating whether to apply function.
+            function:
+                Function to apply to sample.
+        """
         self.signal = signal
         self.function = function
 
@@ -138,7 +150,7 @@ class OnSignal(Base):
 
 
 class Flatten(Base):
-    r"""**Flatten arbitrarily nested sample.**
+    r"""Flatten arbitrarily nested sample.
 
     Example::
 
@@ -147,15 +159,13 @@ class Flatten(Base):
         # Flatten no matter how deep
         dataset = dataset.map(torchdata.maps.Flatten())
 
-    Parameters
-    ----------
-    types : Tuple[type], optional
+    Arguments:
+        types :
             Types to be considered non-flat. Those will be recursively flattened.
             Default: `(list, tuple)`
 
-    Returns
-    -------
-    Tuple[samples]
+    Returns:
+        Tuple[samples]
             Tuple with elements flattened
 
     """
@@ -180,7 +190,7 @@ class Flatten(Base):
 
 
 class Repeat(Base):
-    r"""**Apply function repeatedly to the sample.**
+    r"""Apply function repeatedly to the sample.
 
     Example::
 
@@ -191,16 +201,14 @@ class Repeat(Base):
         # Increase each value by 10 * 1
         dataset = dataset.map(td.maps.Repeat(10, lambda x: x+1))
 
-    Parameters
-    ----------
-    n : int
+    Arguments: 
+        n :
             How many times the function will be applied.
-    function : Callable
+        function :
             Function to apply.
 
-    Returns
-    -------
-    function(sample)
+    Returns:
+        function(sample)
             Function(sample) applied n times.
 
     """
@@ -228,14 +236,14 @@ class _Choice(Base):
 
 
 class Select(_Choice):
-    r"""**Select elements from sample.**
+    r"""Select elements from sample.
 
     Sample has to be indexable object (has `__getitem__` method implemented).
 
-    **Important:**
+    __Important:__
 
     - Negative indexing is supported if supported by sample object.
-    - This function is **faster** than `Drop` and should be used if possible.
+    - This function is __faster__ than `Drop` and should be used if possible.
     - If you want to select sample from nested `tuple`, please use `Flatten` first
     - Returns single element if only one element is left
 
@@ -246,14 +254,12 @@ class Select(_Choice):
         # Only second (first index) element will be taken
         selected = new_dataset.map(td.maps.Select(1))
 
-    Parameters
-    ----------
-    *indices : int
+    Arguments:
+        *indices :
             Indices of objects to select from the sample. If left empty, empty tuple will be returned.
 
-    Returns
-    -------
-    Tuple[samples]
+    Returns:
+        Tuple[samples]
             Tuple with selected elements
 
     """
@@ -263,14 +269,14 @@ class Select(_Choice):
 
 
 class Drop(_Choice):
-    r"""**Return sample without selected elements.**
+    r"""Return sample without selected elements.
 
     Sample has to be indexable object (has `__getitem__` method implemented).
 
-    **Important:**
+    __Important:__
 
     - Negative indexing is supported if supported by sample object.
-    - This function is **slower** than `Select` and the latter should be preffered.
+    - This function is __slower__ than `Select` and the latter should be preffered.
     - If you want to select sample from nested `tuple`, please use `Flatten` first
     - Returns single element if only one element is left
     - Returns `None` if all elements are dropped
@@ -282,15 +288,13 @@ class Drop(_Choice):
         # Zeroth and last samples dropped
         selected = new_dataset.map(td.maps.Drop(0, 2))
 
-    Parameters
-    ----------
-    *indices : int
+    Arguments:
+        *indices :
             Indices of objects to remove from the sample. If left empty, tuple containing
             all elements will be returned.
 
-    Returns
-    -------
-    Tuple[samples]
+    Returns:
+        Tuple[samples]
             Tuple without selected elements
 
     """
@@ -306,11 +310,11 @@ class Drop(_Choice):
 
 
 class ToAll(Base):
-    r"""**Apply function to each element of sample.**
+    r"""Apply function to each element of sample.
 
     Sample has to be `iterable` object.
 
-    **Important:**
+    __Important:__
 
     If you want to apply function to all nested elements (e.g. in nested `tuple`),
     please use `torchdata.maps.Flatten` object first.
@@ -322,14 +326,12 @@ class ToAll(Base):
         # Each concatenated sample will be increased by 1
         selected = new_dataset.map(td.maps.ToAll(lambda x: x+1))
 
-    Attributes
-    ----------
-    function : Callable
+    Attributes:
+        function :
             Function to apply to each element of sample.
 
-    Returns
-    -------
-    Tuple[function(subsample)]
+    Returns:
+        Tuple[function(subsample)]
             Tuple consisting of subsamples with function applied.
 
     """
@@ -342,11 +344,11 @@ class ToAll(Base):
 
 
 class To(Base):
-    """**Apply function to specified elements of sample.**
+    """Apply function to specified elements of sample.
 
     Sample has to be `iterable` object.
 
-    **Important:**
+    __Important:__
 
     If you want to apply function to all nested elements (e.g. in nested `tuple`),
     please use `torchdata.maps.Flatten` object first.
@@ -358,18 +360,16 @@ class To(Base):
         # Zero and first subsamples will be increased by one, last one left untouched
         selected = new_dataset.map(td.maps.To(lambda x: x+1, 0, 1))
 
-    Attributes
-    ----------
-    function : Callable
+    Attributes:
+        function :
             Function to apply to specified elements of sample.
 
-    *indices : int
+        *indices :
             Indices to which function will be applied. If left empty,
             function will not be applied to anything.
 
-    Returns
-    -------
-    Tuple[function(subsample)]
+    Returns:
+        Tuple[function(subsample)]
             Tuple consisting of subsamples with some having the function applied.
 
     """
@@ -386,11 +386,11 @@ class To(Base):
 
 
 class Except(Base):
-    r"""**Apply function to all elements of sample except the ones specified.**
+    r"""Apply function to all elements of sample except the ones specified.
 
     Sample has to be `iterable` object.
 
-    **Important:**
+    __Important:__
 
     If you want to apply function to all nested elements (e.g. in nested `tuple`),
     please use `torchdata.maps.Flatten` object first.
@@ -402,18 +402,16 @@ class Except(Base):
         # Every element increased by one except the first one
         selected = new_dataset.map(td.maps.Except(lambda x: x+1, 0))
 
-    Attributes
-    ----------
-    function: Callable
+    Attributes:
+        function:
             Function to apply to chosen elements of sample.
 
-    *indices: int
+        *indices:
             Indices of objects to which function will not be applied. If left empty,
             function will be applied to every element of sample.
 
-    Returns
-    -------
-    Tuple[function(subsample)]
+    Returns:
+        Tuple[function(subsample)]
             Tuple with subsamples where some have the function applied.
 
     """
