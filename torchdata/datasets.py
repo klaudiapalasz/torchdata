@@ -1,4 +1,4 @@
-"""**Concrete implementations of** `torchdata.Dataset` **and** `torchdata.Iterable`.
+"""Concrete implementations of `torchdata.Dataset` and `torchdata.Iterable`.
 
 Classes below extend and/or make it easier for user to implement common functionalities.
 To use standard PyTorch datasets defined by, for example, `torchvision`, you can
@@ -37,28 +37,26 @@ class _DatasetBase(Base):
         self._chain_object = chain_object
 
     def map(self, function: typing.Callable):
-        r"""**Map function to each element of dataset.**
+        r"""Map function to each element of dataset.
 
         Function has no specified signature; it is user's responsibility to ensure
         it is taking correct arguments as returned from `__getitem__` (in case of `Dataset`)
         or `__iter__` (in case of `Iterable`).
 
-        Parameters
-        ----------
+        
         function: typing.Callable
                 Function (or functor) taking arguments returned from `__getitem__`
                 and returning anything.
 
-        Returns
-        -------
-        self
+        Returns:
+            self
 
         """
         self._maps.append(function)
         return self
 
     def apply(self, function):
-        r"""**Apply function to every element of the dataset.**
+        r"""Apply function to every element of the dataset.
 
         Specified function has to take Python generator as first argument.
         This generator yields consecutive samples from the dataset and the function is free
@@ -66,7 +64,7 @@ class _DatasetBase(Base):
 
         Other arguments will be forwarded to function.
 
-        **WARNING:**
+        !!!note
 
         This function returns anything that's returned from function
         and it's up to user to ensure correct pipeline functioning
@@ -91,36 +89,32 @@ class _DatasetBase(Base):
             summed_dataset = Dataset(101).apply(summation) # Returns 5050
 
 
-        Parameters
-        ----------
-        function : typing.Callable
-                Function (or functional object) taking item generator as first object
-                and variable list of other arguments (if necessary).
+        Arguments:
+            function :
+                    Function (or functional object) taking item generator as first object
+                    and variable list of other arguments (if necessary).
 
-        Returns
-        -------
-        typing.Any
-                Value returned by function
+        Returns:
+            typing.Any
+                    Value returned by function
 
         """
         return function((value for value in self))
 
     def __or__(self, other):
-        r"""**Concatenate {self} and another {self} compatible object.**
+        r"""Concatenate {self} and another {self} compatible object.
 
         During iteration, items from both dataset will be returned as `tuple`.
         Another object could be PyTorch's base class of this object.
 
         Length of resulting dataset is equal to `min(len(self), len(other))`
 
-        Parameters
-        ----------
-        other : {self} or PyTorch's base counterpart
+        Arguments:
+            other :
                 Dataset instance whose sample will be iterated over together
 
-        Returns
-        -------
-        {concat_object}
+        Returns:
+            {concat_object}
                 Proxy object responsible for concatenation between samples.
                 Can be used in the same manner as this object.
 
@@ -130,23 +124,21 @@ class _DatasetBase(Base):
         return self._concat_object((self, other))
 
     def __add__(self, other):
-        r"""**Chain {self} and another {self} compatible object.**
+        r"""Chain {self} and another {self} compatible object.
 
         During iteration, items from self will be returned first and items
         from other dataset after those.
 
         Length of such dataset is equal to `len(self) + len(other)`
 
-        Parameters
-        ----------
-        other : {self} or PyTorch's base counterpart
+        Arguments:
+            other :
                 Dataset whose sample will be yielded after this dataset.
 
-        Returns
-        -------
-        {chain_object}
-                Proxy object responsible for chaining datasets.
-                Can be used in the same manner as this object.
+        Returns:
+            {chain_object}
+            Proxy object responsible for chaining datasets.
+            Can be used in the same manner as this object.
 
         """.format(
             self=self, chain_object=self._chain_object
@@ -155,10 +147,10 @@ class _DatasetBase(Base):
 
 
 class Iterable(TorchIterable, _DatasetBase, metaclass=MetaIterable):
-    r"""`torch.utils.data.IterableDataset` **dataset with extended capabilities**.
+    r"""`torch.utils.data.IterableDataset` dataset with extended capabilities.
 
     This class inherits from
-    `torch.utils.data.IterableDataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset>`__,
+    `torch.utils.data.IterableDataset [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset)
     co can be used in the same manner after inheritance.
 
     It allows user to perform following operations:
@@ -197,7 +189,7 @@ class Iterable(TorchIterable, _DatasetBase, metaclass=MetaIterable):
         self._which = [0]
 
     def filter(self, predicate: typing.Callable):
-        r"""**Filtered  data according to** `predicate`.
+        r"""Filtered  data according to `predicate`.
 
         Values are filtered based on value returned after every operation (including `map`)
         specified before `filter`, for example::
@@ -210,16 +202,14 @@ class Iterable(TorchIterable, _DatasetBase, metaclass=MetaIterable):
 
         Above will return elements `[50, 100]` divisible by `2`.
 
-        Parameters
-        ----------
-        predicate: Callable -> bool
-                Function returning bool and taking single argument (which is
-                whatever is returned from the dataset when `filter` is applied).
-                If `True`, sample will be returned, otherwise it is skipped.
+        Arguments:
+            predicate:
+            Function returning bool and taking single argument (which is
+            whatever is returned from the dataset when `filter` is applied).
+            If `True`, sample will be returned, otherwise it is skipped.
 
-        Returns
-        -------
-        Dataset
+        Returns:
+            Dataset
                 Returns self
 
         """
@@ -229,10 +219,10 @@ class Iterable(TorchIterable, _DatasetBase, metaclass=MetaIterable):
 
 
 class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
-    r"""`torch.utils.data.Dataset` **with extended capabilities.**
+    r"""`torch.utils.data.Dataset` with extended capabilities.
 
     This class inherits from
-    `torch.utils.data.Dataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset>`__,
+    `torch.utils.data.Dataset [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset)
     co can be used in the same manner after inheritance.
     It allows user to perform the following operations:
 
@@ -241,7 +231,7 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
     - `apply` - apply function to **all** elements of dataset
     - `reduce` - reduce dataset to single value with specified function
 
-    **Important:**
+    __Important:__
 
     - Last cache which is able to hold sample is used. Does not matter whether it's in-memory or on-disk or user-specified.
 
@@ -285,23 +275,21 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
         pass
 
     def cache(self, cacher: typing.Callable = None):
-        r"""**Cache data in memory, disk or specify custom caching.**
+        r"""Cache data in memory, disk or specify custom caching.
 
         By default all samples are cached in memory. To change this behaviour specify `cacher`
         argument. Some `cacher` implementations can be found in `torchdata.cacher` module or you can
         provide your own by inheriting from `torchdata.cacher.Cacher` and implementing
         appropriate methods.
 
-        Parameters
-        ----------
-        cacher : torchdata.cacher.Cacher, optional
-                Instance of `torchdata.cacher.Cacher` (or any other object with compatible interface).
-                Check `cacher` module documentation for more information.
-                Default: `torchdata.cacher.Memory` which caches data in-memory
+        Arguments:
+            cacher : 
+            Instance of `torchdata.cacher.Cacher` (or any other object with compatible interface).
+            Check `cacher` module documentation for more information.
+            Default: `torchdata.cacher.Memory` which caches data in-memory
 
-        Returns
-        -------
-        Dataset
+        Returns:
+            Dataset
                 Returns self
 
         """
@@ -312,9 +300,9 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
         return self
 
     def reduce(self, function: typing.Callable, initializer=None):
-        r"""**Reduce dataset to single element with function.**
+        r"""Reduce dataset to single element with function.
 
-        Works like `functools.reduce <https://docs.python.org/3/library/functools.html#functools.reduce>`__.
+        Works like `functools.reduce [here](https://docs.python.org/3/library/functools.html#functools.reduce)
 
         **Example**::
 
@@ -332,16 +320,14 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
             summed_dataset = Dataset(10).reduce(lambda x, y: x + y) # Returns 45
 
 
-        Parameters
-        ----------
-        function : typing.Callable
+        Arguments:
+            function :
                 Two argument function returning single value used to `reduce` dataset.
-        initializer: typing.Any, optional
+            initializer:
                 Value with which reduction will start.
 
-        Returns
-        -------
-        typing.Any
+        Returns:
+            typing.Any
                 Reduced value
 
         """
@@ -350,15 +336,14 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
         return functools.reduce(function, (item for item in self), initializer)
 
     def reset(self, cache: bool = True, maps: bool = True):
-        r"""**Reset dataset state.**
+        r"""Reset dataset state.
 
         `cache` and `maps` can be resetted separately.
 
-        Parameters
-        ----------
-        cache : bool, optional
+        Arguments:
+            cache :
                 Reset current cache. Default: `True`
-        maps : bool, optional
+            maps :
                 Reset current disk cache. Default: `True`
 
         """
@@ -377,13 +362,13 @@ class Dataset(TorchDataset, _DatasetBase, metaclass=MetaDataset):
 
 
 class ConcatDataset(Dataset):
-    r"""**Concrete** `torchdata.Dataset` **responsible for sample-wise concatenation.**
+    r"""Concrete `torchdata.Dataset` responsible for sample-wise concatenation.
 
     This class is returned when `|` (logical or operator) is used on instance
     of `torchdata.Dataset` (original `torch.utils.data.Dataset
-    <https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset>`__ can be used as well).
+    [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.Dataset) can be used as well).
 
-    **Important:** This class is meant to be more of a proxy for `|` operator,
+    __Important:__ This class is meant to be more of a proxy for `|` operator,
     you can use it directly though.
 
     **Example**::
@@ -395,14 +380,19 @@ class ConcatDataset(Dataset):
 
     Any `Dataset` methods can be used normally.
 
-    Attributes
-    ----------
-    datasets : List[Union[torchdata.Dataset, torch.utils.data.Dataset]]
-            List of datasets to be concatenated sample-wise.
+    Attributes:
+        datasets :
+        List of datasets to be concatenated sample-wise.
 
     """
 
     def __init__(self, datasets: typing.List):
+        """Initialize `ConcatDataset` object.
+        
+        Arguments:
+            datasets :
+                List of datasets to be concatenated sample-wise.
+        """
         super().__init__()
         self.datasets = datasets
 
@@ -414,13 +404,13 @@ class ConcatDataset(Dataset):
 
 
 class ConcatIterable(Iterable):
-    r"""**Concrete** `Iterable` **responsible for sample-wise concatenation.**
+    r"""Concrete `Iterable` responsible for sample-wise concatenation.
 
     This class is returned when `|` (logical or operator) is used on instance
     of `Iterable` (original `torch.utils.data.IterableDataset
-    <https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset>`__ can be used as well).
+    [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.IterableDataset) can be used as well.
 
-    .. note::
+    !!!note
 
         This class is meant to be more of a proxy for `|` operator,
         you can use it directly though.
@@ -434,14 +424,19 @@ class ConcatIterable(Iterable):
 
     Any `IterableDataset` methods can be used normally.
 
-    Attributes
-    ----------
-    datasets : List[Union[torchdata.Iterable, torch.utils.data.IterableDataset]]
-            List of datasets to be concatenated sample-wise.
+    Attributes:
+        datasets :
+                List of datasets to be concatenated sample-wise.
 
     """
 
     def __init__(self, datasets: typing.List):
+        """Initialize `ConcatIterable` object.
+        
+        Arguments:
+            datasets :
+                List of datasets to be concatenated sample-wise.
+        """
         super().__init__()
         self.datasets = datasets
 
@@ -456,13 +451,13 @@ class ConcatIterable(Iterable):
 
 
 class ChainDataset(TorchConcatDataset, Dataset):
-    r"""**Concrete** `torchdata.Dataset` **responsible for chaining multiple datasets.**
+    r"""Concrete `torchdata.Dataset` responsible for chaining multiple datasets.
 
     This class is returned when `+` (logical or operator) is used on instance
     of `torchdata.Dataset` (original `torch.utils.data.Dataset` can be used as well).
-    Acts just like PyTorch's `+` or rather `torch.utils.data.ConcatDataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.ConcatDataset>`__
+    Acts just like PyTorch's `+` or rather `torch.utils.data.ConcatDataset [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.ConcatDataset)
 
-    .. note::
+    !!!note
 
         This class is meant to be more of a proxy for `+` operator,
         you can use it directly though.
@@ -475,8 +470,7 @@ class ChainDataset(TorchConcatDataset, Dataset):
     Any `Dataset` methods can be used normally.
 
     Attributes
-    ----------
-    datasets : List[Union[torchdata.Dataset, torch.utils.data.Dataset]]
+        datasets :
             List of datasets to be chained.
 
     """
@@ -487,13 +481,13 @@ class ChainDataset(TorchConcatDataset, Dataset):
 
 
 class ChainIterable(TorchChain, Iterable):
-    r"""**Concrete** `torchdata.Iterable` **responsible for chaining multiple datasets.**
+    r"""Concrete `torchdata.Iterable` responsible for chaining multiple datasets.
 
     This class is returned when `+` (logical or operator) is used on instance
     of `torchdata.Iterable` (original `torch.utils.data.Iterable` can be used as well).
-    Acts just like PyTorch's `+` and `ChainDataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.ChainDataset>`__.
+    Acts just like PyTorch's `+` and `ChainDataset [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.ChainDataset)
 
-    .. note::
+    !!!note
 
         This class is meant to be more of a proxy for `+` operator,
         you can use it directly though.
@@ -506,9 +500,8 @@ class ChainIterable(TorchChain, Iterable):
 
     Any `Iterable` methods can be used normally.
 
-    Attributes
-    ----------
-    datasets : List[Union[torchdata.Iterable, torch.utils.data.IterableDataset]]
+    Attributes:
+        datasets :
             List of datasets to be chained.
 
     """
@@ -526,12 +519,12 @@ class ChainIterable(TorchChain, Iterable):
 
 
 class Files(Dataset):
-    r"""**Create** `Dataset` **from list of files.**
+    r"""Create `Dataset` from list of files.
 
     Each file is a separate sample. User can use this class directly
     as all necessary methods are implemented.
 
-    `__getitem__` uses Python's `open <https://docs.python.org/3/library/functions.html#open>`__
+    `__getitem__` uses Python's `open [here](https://docs.python.org/3/library/functions.html#open)
     and returns file. It's implementation looks like::
 
         # You can modify open behaviour by passing args nad kwargs to __init__
@@ -560,40 +553,37 @@ class Files(Dataset):
     `from_folder` class method is available for common case of creating dataset
     from files in folder.
 
-    Parameters
-    ----------
-    files : List[pathlib.Path]
+    Arguments:
+        files : 
             List of files to be used.
-    regex : str, optional
+        regex : 
             Regex to be used  for filtering. Default: `*` (all files)
-    *args
+        *args
             Arguments saved for `__getitem__`
-    **kwargs
+        **kwargs
             Keyword arguments saved for `__getitem__`
 
     """
 
     @classmethod
     def from_folder(cls, path: pathlib.Path, regex: str = "*", *args, **kwargs):
-        r"""**Create dataset from** `pathlib.Path` **-like object.**
+        r"""Create dataset from `pathlib.Path` -like object.
 
         Path should be a directory and will be extended via `glob` method taking `regex`
         (if specified). Varargs and kwargs will be saved for use for `__getitem__` method.
 
-        Parameters
-        ----------
-        path : pathlib.Path
+        Attributes:
+            path :
                 Path object (directory) containing samples.
-        regex : str, optional
+            regex :
                 Regex to be used  for filtering. Default: `*` (all files)
-        *args
+            *args
                 Arguments saved for `__getitem__`
-        **kwargs
+            **kwargs
                 Keyword arguments saved for `__getitem__`
 
-        Returns
-        -------
-        FilesDataset
+        Returns:
+            FilesDataset
                 Instance of your file based dataset.
         """
 
@@ -601,6 +591,18 @@ class Files(Dataset):
         return cls(files, *args, **kwargs)
 
     def __init__(self, files: typing.List[pathlib.Path], *args, **kwargs):
+        """Initialize `Files` object.
+        
+        Arguments:
+            path :
+                Path object (directory) containing samples.
+            regex :
+                Regex to be used  for filtering. Default: `*` (all files)
+            *args
+                Arguments saved for `__getitem__`
+            **kwargs
+                Keyword arguments saved for `__getitem__`
+        """
         super().__init__()
         self.files = files
         self.args = args
@@ -614,42 +616,38 @@ class Files(Dataset):
             return file
 
     def filter(self, predicate: typing.Callable):
-        r"""**Remove** `files` **for which predicate returns** `False`**.**
+        r"""Remove `files` for which predicate returns `False`.
 
-        **Note:** This is different from `torchdata.Iterable`'s `filter` method,
+        __Note:__ This is different from `torchdata.Iterable`'s `filter` method,
         as the filtering is done when called, not during iteration.
 
-        Parameters
-        ----------
-        predicate : Callable
+        Arguments:
+            predicate :
                 Function-like object taking file as argument and returning boolean
                 indicating whether to keep a file.
 
-        Returns
-        -------
-        FilesDataset
+        Returns:
+            FilesDataset
                 Modified self
         """
         self.files = [file for file in self.files if predicate(file)]
         return self
 
     def sort(self, key=None, reverse=False):
-        r"""**Sort files using Python's built-in** `sorted` **method.**
+        r"""Sort files using Python's built-in `sorted` method.
 
         Arguments are passed directly to `sorted`.
 
-        Parameters
-        ----------
-        key: Callable, optional
-            Specifies a function of one argument that is used to extract a comparison key from each element.
-            Default: `None` (compare the elements directly).
+        Arguments:
+            key:
+                Specifies a function of one argument that is used to extract a comparison key from each element.
+                Default: `None` (compare the elements directly).
 
-        reverse: bool, optional
-            Whether `sorting` should be descending. Default: `False`
+            reverse:
+                Whether `sorting` should be descending. Default: `False`
 
-        Returns
-        -------
-        FilesDataset
+        Returns:
+            FilesDataset
                 Modified self
 
         """
@@ -658,13 +656,12 @@ class Files(Dataset):
 
 
 class TensorDataset(TorchTensorDataset, Dataset):
-    r"""**Dataset wrapping** `torch.tensors` **.**
+    r"""Dataset wrapping `torch.tensors` .
 
-    `cache`, `map` etc. enabled version of `torch.utils.data.TensorDataset <https://pytorch.org/docs/stable/data.html#torch.utils.data.TensorDataset>`__.
+    `cache`, `map` etc. enabled version of `torch.utils.data.TensorDataset [here](https://pytorch.org/docs/stable/data.html#torch.utils.data.TensorDataset)
 
-    Parameters:
-    -----------
-    *tensors : torch.Tensor
+    Arguments:
+        *tensors :
             List of `tensors` to be wrapped.
     """
 
@@ -674,15 +671,20 @@ class TensorDataset(TorchTensorDataset, Dataset):
 
 
 class Generator(Iterable):
-    r"""**Iterable wrapping any generator expression.**
+    r"""Iterable wrapping any generator expression.
 
-    Parameters:
-    -----------
-    expression: Generator expression
+    Arguments:
+        expression:
             Generator from which one can `yield` via `yield from` syntax.
     """
 
     def __init__(self, expression):
+        """Initialize `Generator` object.
+        
+        Arguments:
+            expression:
+                Generator from which one can `yield` via `yield from` syntax.
+        """
         super().__init__()
         self.expression = expression
 
@@ -696,7 +698,7 @@ class _Wrap:
 
 
 class WrapDataset(_Wrap, Dataset):
-    r"""**Dataset wrapping standard** `torch.data.utils.Dataset` **and making it** `torchdata.Dataset` **compatible.**
+    r"""Dataset wrapping standard `torch.data.utils.Dataset` and making it `torchdata.Dataset` compatible.
 
     All attributes of wrapped dataset can be used normally, for example::
 
@@ -705,9 +707,8 @@ class WrapDataset(_Wrap, Dataset):
         )
         dataset.train # True, has all MNIST attributes
 
-    Parameters:
-    -----------
-    dataset: `torch.data.utils.Dataset`
+    Arguments:
+        dataset: 
             Dataset to be wrapped
     """
 
@@ -723,14 +724,13 @@ class WrapDataset(_Wrap, Dataset):
 
 
 class WrapIterable(_Wrap, Iterable):
-    r"""**Iterable wrapping standard** `torch.data.utils.IterableDataset` **and making it** `torchdata.Iterable` **compatible.**
+    r"""Iterable wrapping standard `torch.data.utils.IterableDataset` and making it `torchdata.Iterable` compatible.
 
     All attributes of wrapped dataset can be used normally as is the case for
     `torchdata.datasets.WrapDataset`.
 
-    Parameters:
-    -----------
-    dataset: `torch.data.utils.Dataset`
+    Arguments:
+        dataset:
             Dataset to be wrapped
     """
 
