@@ -1,4 +1,4 @@
-r"""__This module contains PyTorch compatible datasets with extended capabilities.__
+r"""This module contains PyTorch compatible datasets with extended capabilities.
 
 To quickly start with `torchdata`, just inherit from `torchdata.Dataset` and create
 your dataset as you normally would, for example::
